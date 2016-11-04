@@ -10,5 +10,5 @@ interface MiddlewarePipeInterface
      */
     public function pipe(callable $middleware):MiddlewarePipeInterface;
 
-    public function dispatch($command, array $arguments = []);
+    public function dispatch(CommandDispatchRequestInterface $request, CommandDispatchResultInterface $result):CommandDispatchResultInterface;
 }

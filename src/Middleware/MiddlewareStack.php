@@ -9,21 +9,21 @@ class MiddlewarePipe implements MiddlewarePipeInterface
     /**
      * @var SplQueue
      */
-    private $queue;
+    private $middlewares;
 
     public function __construct()
     {
-        $this->queue = new SplQueue();
+        $this->middlewares = new SplQueue();
     }
 
     public function pipe(callable $middleware):MiddlewarePipeInterface
     {
-        $this->queue->enqueue($middleware);
+        $this->middlewares->enqueue($middleware);
 
         return $this;
     }
 
-    public function dispatch($command, array $arguments = []) {
-
+    public function dispatch($command, array $arguments = [])
+    {
     }
 }
