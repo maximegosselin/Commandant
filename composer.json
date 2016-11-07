@@ -14,7 +14,7 @@
     ],
     "require": {
         "php": "~7.0",
-        "maximegosselin/rainbow": "dev-develop"
+        "maximegosselin/rainbow": "~1"
     },
     "require-dev": {
         "phing/phing": "~2",

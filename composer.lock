@@ -4,12 +4,12 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "d09208602ad667d63e0c0065689fed77",
-    "content-hash": "c64a4afbdfb17e1e2ccdb73d2be7cb5b",
+    "hash": "e69c9721cf20449bb996c38e9e046609",
+    "content-hash": "b4d44c71268bad022cedd0b168f17dd5",
     "packages": [
         {
             "name": "maximegosselin/rainbow",
-            "version": "dev-develop",
+            "version": "1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/maximegosselin/rainbow.git",
@@ -1528,9 +1528,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "maximegosselin/rainbow": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
