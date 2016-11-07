@@ -13,16 +13,13 @@
         }
     ],
     "require": {
-        "php": "~7.0"
+        "php": "~7.0",
+        "maximegosselin/rainbow": "dev-develop"
     },
     "require-dev": {
-        "maximegosselin/trigger": "~1",
         "phing/phing": "~2",
         "phpunit/phpunit": "~5",
         "squizlabs/php_codesniffer": "~2"
-    },
-    "suggest": {
-        "maximegosselin/trigger": "Event management for PHP"
     },
     "autoload": {
         "psr-4": {

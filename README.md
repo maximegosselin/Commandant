@@ -1,8 +1,12 @@
 # Commandant
 
+[![Latest Version](https://img.shields.io/github/release/maximegosselin/commandant.svg)](https://github.com/maximegosselin/commandant/releases)
+[![Build Status](https://img.shields.io/travis/maximegosselin/commandant.svg)](https://travis-ci.org/maximegosselin/commandant)
 [![Software License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-*Commandant* is an implementation of the Command design pattern using Command Bus.
+*Commandant* is a lightweight and ultra-flexible Command Bus that won't get in your way.
+
+It can dispatch commands of any kind and be customized with a middleware approach.
 
 
 ## System Requirements
@@ -23,21 +27,34 @@ $ composer require maximegosselin/commandant
 
 ## Documentation
 
-TODO
+See [/docs](docs/USAGE.md) for complete documentation.
 
+Create a command bus:
 ```php
-$commandBus = new TransactionalCommandBus(new CommandBus());
+$bus = new CommandBus();
+```
 
-/* Object command */
-$command = new MyCommand('foo', 123);
-$commandBus->dispatch($foo);
+Use simple string commands...
+```php
+$bus->registerHandler('login', function(string $command, array $arguments) {
+    // Put some logic here...
+});
  
-/* String command */ 
-$commandBus->dispatch('login', [
+$bus->dispatch('login', [
     'username' => 'john',
     'password' => 'secret'
 ]);
 ```
+
+...or class commands
+```php
+$bus->registerHandler('\MyApp\LoginCommand', new \MyApp\LoginCommandHandler());
+ 
+$command = new \MyApp\LoginCommand('john', 'secret');
+ 
+$bus->dispatch($command);
+```
+
 
 ## Tests
 

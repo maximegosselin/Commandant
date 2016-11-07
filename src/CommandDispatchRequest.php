@@ -1,26 +1,24 @@
 <?php
 declare(strict_types = 1);
-namespace MaximeGosselin\Commandant\Middleware;
+namespace MaximeGosselin\Commandant;
 
-class CommandDispatchResult implements CommandDispatchRequestInterface
+use MaximeGosselin\Commandant\Exception\InvalidCommandTypeException;
+
+class CommandDispatchRequest implements CommandDispatchRequestInterface
 {
     /**
-     * @var mixed
+     * @var string|object
      */
-    private $command = null;
+    private $command;
 
     /**
      * @var array
      */
-    private $arguments = [];
+    private $arguments;
 
-    /**
-     * @var callable
-     */
-    private $handler = null;
-
-    protected function __construct($command, array $arguments = [], $handler = null)
+    public function __construct($command, array $arguments = [], $handler = null)
     {
+        $this->assertCommandType($command);
         $this->command = $command;
         $this->arguments = $arguments;
         $this->handler = $handler;
@@ -33,6 +31,7 @@ class CommandDispatchResult implements CommandDispatchRequestInterface
 
     public function withCommand($command):CommandDispatchRequestInterface
     {
+        $this->assertCommandType($command);
         $clone = clone $this;
         $clone->command = $command;
 
@@ -52,19 +51,10 @@ class CommandDispatchResult implements CommandDispatchRequestInterface
         return $clone;
     }
 
-    /**
-     * @return null|callable
-     */
-    public function getHandler()
+    private function assertCommandType($command)
     {
-        return $this->handler;
-    }
-
-    public function withHandler(callable $handler = null):CommandDispatchRequestInterface
-    {
-        $clone = clone $this;
-        $clone->handler = $handler;
-
-        return $clone;
+        if (!CommandTypeValidator::validate($command)) {
+            throw InvalidCommandTypeException::forCommand($command);
+        }
     }
 }

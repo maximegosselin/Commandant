@@ -1,98 +1,59 @@
 <?php
 declare(strict_types = 1);
-namespace MaximeGosselin\Commandant\Component;
+namespace MaximeGosselin\Commandant;
 
-use Exception;
-use MaximeGosselin\Commandant\Api\CommandBusInterface;
-use MaximeGosselin\Commandant\Api\CommandHandlerInterface;
-use MaximeGosselin\Commandant\Api\CommandInterface;
-use MaximeGosselin\Trigger\EventManagerInterface;
+use MaximeGosselin\Commandant\Exception\InvalidCommandTypeException;
+use MaximeGosselin\Commandant\Exception\InvalidMiddlewareException;
+use MaximeGosselin\Rainbow\MiddlewareStack;
+use MaximeGosselin\Rainbow\MiddlewareStackInterface;
 
 class CommandBus implements CommandBusInterface
 {
-    const EVENT_COMMAND_FAILURE = 'commandbus.command.failure';
-
-    const EVENT_COMMAND_SUCCESS = 'commandbus.command.success';
-
-    const EVENT_COMMAND_UNHANDLED = 'commandbus.command.unhandled';
+    /**
+     * @var MiddlewareStackInterface
+     */
+    private $middlewares;
 
     /**
-     * @var EventManagerInterface
+     * @var CommandHandlerInvoker
      */
-    private $eventManager;
+    private $invoker;
 
-    /**
-     *
-     * @var array
-     */
-    private $handlers = [];
-
-    /**
-     *
-     * @var array
-     */
-    private $queue = [];
-
-    /**
-     *
-     * @var boolean
-     */
-    private $isDispatching = false;
-
-    public function registerHandler(CommandHandlerInterface $handler)
+    public function __construct()
     {
-        $this->handlers[] = $handler;
+        $this->invoker = new CommandHandlerInvoker();
+        $this->middlewares = new MiddlewareStack([
+            $this->invoker,
+            'invoke'
+        ]);
     }
 
-    public function dispatch(CommandInterface $command)
+    public function dispatch($command, array $arguments = []):CommandDispatchResultInterface
     {
-        $this->queue[] = $command;
-
-        if ($this->isDispatching) {
-            return;
+        if (!CommandTypeValidator::validate($command)) {
+            throw InvalidCommandTypeException::forCommand($command);
         }
-        $this->isDispatching = true;
 
-        while (($command = array_shift($this->queue)) == true) {
-            $handled = false;
-            foreach ($this->handlers as $handler) {
-                try {
-                    $handler->handle($command);
-                } catch (Exception $e) {
-                    $this->isDispatching = false;
-                    $this->triggerSelfEvent(self::EVENT_COMMAND_FAILURE, [
-                        $command,
-                        $handler,
-                        $e
-                    ]);
+        $request = new CommandDispatchRequest($command, $arguments);
+        $result = new CommandDispatchResult(null);
 
-                    return;
-                }
-
-                $this->triggerSelfEvent(self::EVENT_COMMAND_SUCCESS, [
-                    $command,
-                    $handler
-                ]);
-                $handled = true;
-            }
-            if (!$handled) {
-                $this->triggerSelfEvent(self::EVENT_COMMAND_UNHANDLED, [
-                    $command
-                ]);
-            }
-        }
-        $this->isDispatching = false;
+        return $this->middlewares->call($request, $result);
     }
 
-    private function triggerSelfEvent(string $event, array $params = [])
+    public function registerHandler(string $identifier, callable $handler):CommandBusInterface
     {
-        if ($this->eventManager) {
-            $this->eventManager->trigger($event, $params);
-        }
+        $this->invoker->registerHandler($identifier, $handler);
+
+        return $this;
     }
 
-    public function setEventManager(EventManagerInterface $eventManager)
+    public function addMiddleware(callable $middleware):CommandBusInterface
     {
-        $this->eventManager = $eventManager;
+        if (!MiddlewareSignatureValidator::validate($middleware)) {
+            throw new InvalidMiddlewareException();
+        }
+        $this->middlewares->push($middleware);
+
+        return $this;
     }
 }
