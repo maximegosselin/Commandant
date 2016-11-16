@@ -3,46 +3,44 @@ declare(strict_types = 1);
 namespace MaximeGosselin\Commandant;
 
 use ReflectionFunction;
+use ReflectionMethod;
 
 class MiddlewareSignatureValidator
 {
     public static function validate(callable $middleware):bool
     {
-        $reflection = new ReflectionFunction($middleware);
+        $function = is_array($middleware) ? new ReflectionMethod($middleware[0], $middleware[1]) : new ReflectionFunction($middleware);
 
-        return self::hasValidParameters($reflection) && self::hasValidReturnType($reflection);
+        return self::hasValidParameters($function) && self::hasValidReturnType($function);
     }
 
-    private static function hasValidParameters(ReflectionFunction $reflection):bool
+    private static function hasValidParameters(ReflectionFunction $function):bool
     {
-        $params = $reflection->getParameters();
+        $params = $function->getParameters();
 
         if (count($params) != 3) {
             return false;
         }
-        if (!$params[0]->getType() || !$params[1]->getType() || !$params[2]->getType()) {
+        if ($params[0]->getType() && (string)$params[0]->getType() != CommandDispatchRequestInterface::class) {
             return false;
         }
-        if ((string)$params[0]->getType() != CommandDispatchRequestInterface::class) {
+        if ($params[1]->getType() && (string)$params[1]->getType() != CommandDispatchResultInterface::class) {
             return false;
         }
-        if ((string)$params[1]->getType() != CommandDispatchResultInterface::class) {
-            return false;
-        }
-        if ((string)$params[2]->getType() != 'callable') {
+        if ($params[2]->getType() && (string)$params[2]->getType() != 'callable') {
             return false;
         }
 
         return true;
     }
 
-    private static function hasValidReturnType(ReflectionFunction $reflection):bool
+    private static function hasValidReturnType(ReflectionFunction $function):bool
     {
-        $returnType = $reflection->getReturnType();
-        if (!$returnType) {
+        $returnType = $function->getReturnType();
+        if ($returnType && $returnType->__toString() != CommandDispatchResultInterface::class) {
             return false;
         }
 
-        return $returnType->__toString() == CommandDispatchResultInterface::class;
+        return true;
     }
 }

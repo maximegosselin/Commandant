@@ -49,8 +49,8 @@ class CommandBusTest extends TestCase
     public function testAddInvalidMiddleware2ThrowsException()
     {
         $mw = function (
-            CommandDispatchRequestInterface $request,
-            CommandDispatchResultInterface $result,
+            string $request,
+            string $result,
             callable $next
         ) {
         };

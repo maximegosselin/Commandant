@@ -10,78 +10,72 @@ class MiddlewareSignatureValidatorTest extends TestCase
 {
     public function testValidSignature()
     {
-        $mw = function (
-            CommandDispatchRequestInterface $request,
-            CommandDispatchResultInterface $result,
-            callable $next
+        $mw = function($request, $result, $next) {
+        };
+        $this->assertTrue(MiddlewareSignatureValidator::validate($mw));
+
+        $mw = function(CommandDispatchRequestInterface $request, $result, $next) {
+        };
+        $this->assertTrue(MiddlewareSignatureValidator::validate($mw));
+
+        $mw = function($request, CommandDispatchResultInterface $result, $next) {
+        };
+        $this->assertTrue(MiddlewareSignatureValidator::validate($mw));
+
+        $mw = function($request, $result, callable $next) {
+        };
+        $this->assertTrue(MiddlewareSignatureValidator::validate($mw));
+
+        $mw = function($request, $result, $next):CommandDispatchResultInterface {
+        };
+        $this->assertTrue(MiddlewareSignatureValidator::validate($mw));
+
+        $mw = function(
+            CommandDispatchRequestInterface $request, CommandDispatchResultInterface $result, callable $next
         ):CommandDispatchResultInterface {
         };
-
         $this->assertTrue(MiddlewareSignatureValidator::validate($mw));
     }
 
     public function testInvalidParameters()
     {
-        $mw = function (
-            $request,
-            CommandDispatchResultInterface $result,
-            callable $next
-        ):CommandDispatchResultInterface {
-        };
-        $this->assertFalse(MiddlewareSignatureValidator::validate($mw));
-        $mw = function (
-            string $request,
-            CommandDispatchResultInterface $result,
-            callable $next
-        ):CommandDispatchResultInterface {
+        $mw = function() {
         };
         $this->assertFalse(MiddlewareSignatureValidator::validate($mw));
 
-        $mw = function (
-            CommandDispatchRequestInterface $request,
-            $result,
-            callable $next
-        ):CommandDispatchResultInterface {
-        };
-        $this->assertFalse(MiddlewareSignatureValidator::validate($mw));
-        $mw = function (
-            CommandDispatchRequestInterface $request,
-            string $result,
-            callable $next
-        ):CommandDispatchResultInterface {
+        $mw = function($a) {
         };
         $this->assertFalse(MiddlewareSignatureValidator::validate($mw));
 
-        $mw = function (
-            CommandDispatchRequestInterface $request,
-            CommandDispatchResultInterface $result,
-            $next
-        ):CommandDispatchResultInterface {
+        $mw = function($a, $b) {
         };
         $this->assertFalse(MiddlewareSignatureValidator::validate($mw));
-        $mw = function (
-            CommandDispatchRequestInterface $request,
-            CommandDispatchResultInterface $result,
-            string $next
-        ):CommandDispatchResultInterface {
+
+        $mw = function($a, $b, $c, $d) {
+        };
+        $this->assertFalse(MiddlewareSignatureValidator::validate($mw));
+
+        $mw = function(string $request, $result, $next) {
+        };
+        $this->assertFalse(MiddlewareSignatureValidator::validate($mw));
+
+        $mw = function($request, string $result, $next) {
+        };
+        $this->assertFalse(MiddlewareSignatureValidator::validate($mw));
+
+        $mw = function($request, $result, string $next) {
+        };
+        $this->assertFalse(MiddlewareSignatureValidator::validate($mw));
+
+        $mw = function($request, $result, $next):string {
         };
         $this->assertFalse(MiddlewareSignatureValidator::validate($mw));
     }
 
     public function testInvalidReturnType()
     {
-        $mw = function (
-            CommandDispatchRequestInterface $request,
-            CommandDispatchResultInterface $result,
-            callable $next
-        ) {
-        };
-        $this->assertFalse(MiddlewareSignatureValidator::validate($mw));
-
-        $mw = function (
-            CommandDispatchRequestInterface $request,
-            CommandDispatchResultInterface $result,
-            callable $next
+        $mw = function(
+            CommandDispatchRequestInterface $request, CommandDispatchResultInterface $result, callable $next
         ):string {
         };
         $this->assertFalse(MiddlewareSignatureValidator::validate($mw));
